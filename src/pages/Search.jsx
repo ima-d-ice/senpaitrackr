@@ -115,7 +115,7 @@ function Search() {
 
         {loading && <p className="text-center text-lg font-medium text-gray-700 dark:text-gray-300">Loading...</p>}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4 justify-items-center">
           {Array.from(
             new Map(results.map(item => [item.mal_id, item])).values()
           ).map((anime) => (
