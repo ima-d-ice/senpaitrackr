@@ -1,37 +1,55 @@
 import { Link } from "react-router-dom";
 import { ThemeContext } from '../context/ThemeContext';
-
 import { useContext } from 'react';
-
-import React from 'react'
+import React from 'react';
 
 function Navbar() {
-  const {theme,setTheme} = useContext(ThemeContext);
+  const { theme, setTheme } = useContext(ThemeContext);
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
-  }
+  };
   return (
-    <div data-theme = {theme}>
-      <nav className="bg-gray-100 dark:bg-gray-900 p-4 shadow-md text-gray-900 dark:text-white">
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="flex space-x-4 text-lg font-medium">
-          <Link to="/" className="hover:text-teal-500 dark:hover:text-teal-300 transition-colors duration-200">Home</Link>
-          <Link to="/search" className="hover:text-teal-500 dark:hover:text-teal-300 transition-colors duration-200">Search</Link>
-          <Link to="/library" className="hover:text-teal-500 dark:hover:text-teal-300 transition-colors duration-200">Library</Link>
+    <div data-theme={theme}>
+      <nav>
+        <div className="bg-amber-50 dark:bg-neutral-900 
+        flex justify-between justify-items-center items-center place-items-center p-4 shadow-lg"> 
+          
+            <Link
+              to="/"
+              className="nav-link-custom"
+            >
+              Home
+            </Link>
+            <Link
+              to="/search"
+              className="nav-link-custom"
+            >
+              Search
+            </Link>
+            <Link
+              to="/library"
+              className="nav-link-custom"
+            >
+              Library
+            </Link>
+          <button
+            onClick={toggleTheme}
+            className="
+              ml-4 p-2 rounded-md text-gray-800 dark:text-gray-200
+              transition-all duration-300 ease-in-out
+              hover:-translate-y-1
+             
+            "
+           
+          >
+            {theme === 'light' ? '☀️' : '🌙'}
+          </button>
         </div>
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 text-2xl"
-          aria-label="Toggle theme"
-        >
-          {theme === 'light' ? '☀️' : '🌙'}
-        </button>
-      </div>
-    </nav>
-  </div>
-  )
+      </nav>
+    </div>
+  );
 }
 
-export default Navbar
+export default Navbar;

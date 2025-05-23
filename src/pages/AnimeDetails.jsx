@@ -72,8 +72,8 @@ export default function AnimeDetails() {
 
   return (
     <div data-theme = {theme}>
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-8 px-4 md:px-12">
-      <div className="max-w-6xl mx-auto bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 md:p-8">
+    <div className="min-h-screen bg-amber-50 dark:bg-neutral-900 py-8 px-4 md:px-12">
+      <div className="max-w-6xl mx-auto bg-neutral-200 dark:bg-zinc-600 shadow-xl rounded-lg p-6 md:p-8">
         <div className="md:flex">
           <div className="md:w-1/3 mb-6 md:mb-0 md:mr-8">
             <img 

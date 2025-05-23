@@ -60,7 +60,7 @@ function Library() {
       }, []);
     
   return (
-    <div data-theme={theme} className="min-h-screen bg-gray-100 dark:bg-gray-900 py-6">
+    <div data-theme={theme} className="min-h-screen bg-amber-50 dark:bg-neutral-900 py-6">
       <div className="container mx-auto px-4">
         <div className="flex justify-center mb-6">
             <select

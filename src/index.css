@@ -1,3 +1,34 @@
 @import "tailwindcss";
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+@layer components {
+  .dark {
+    @apply dark:bg-gray-900 dark:text-white;
+  }
+  
+  .nav-link-custom {
+    @apply py-2 px-3 md:px-5 rounded-md 
+          text-blue-900 dark:text-cyan-500
+          hover:text-blue-400 dark:hover:text-blue-300
+
+          font-semibold text-lg
+          hover:-translate-y-1
+          transition-all duration-300 ease-in-out 
+
+          
+  }
+  .h-home{
+    @apply text-4xl font-bold mb-8 text-center
+     text-blue-700 dark:text-blue-400
+  }
+  .g-home{
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7 gap-6
+  }
+  .search-btn{
+    @apply bg-zinc-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 
+          text-gray-600 dark:text-gray-300 
+          rounded-r-full transition-colors duration-200
+          border-l border-gray-300 dark:border-gray-600
+  }
+
+}

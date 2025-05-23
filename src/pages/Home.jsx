@@ -75,9 +75,9 @@ function Home() {
 
   return (
     <div data-theme = {theme}>
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-blue-50 to-white dark:from-gray-900 dark:via-gray-800 dark:to-slate-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <div className="min-h-screen bg-amber-50 dark:bg-neutral-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
      
-      <section className="relative text-center py-24 sm:py-32 px-4 bg-white dark:bg-slate-900 overflow-hidden">
+      <section className="relative text-center py-24 sm:py-32 px-4 bg-amber-50 dark:bg-neutral-900 overflow-hidden">
         
         
         <div className="relative z-10 max-w-3xl mx-auto">
@@ -111,7 +111,7 @@ function Home() {
 
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         {randomRec && (
-          <div className="mb-16 p-6 bg-white dark:bg-gray-800 shadow-lg rounded-xl">
+          <div className="mb-16 p-6 bg-zinc-300 dark:bg-zinc-800 shadow-lg rounded-xl">
             <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white text-center sm:text-left">🎲 Random Pick for You</h2>
             <div className="flex justify-center">
               <AnimeCard
@@ -127,8 +127,8 @@ function Home() {
         )}
 
         <section className="mb-16">
-          <h2 className="text-4xl font-bold mb-8 text-center text-blue-700 dark:text-blue-400">🔥 Top Anime</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <h2 className="h-home">🔥 Top Anime</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {topAnime.map(anime => (
               <AnimeCard
                 key={anime.mal_id}
@@ -144,8 +144,8 @@ function Home() {
         </section>
 
         <section className="mb-16">
-          <h2 className="text-4xl font-bold mb-8 text-center text-green-700 dark:text-green-400">📺 Currently Airing</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <h2 className="h-home">📺 Currently Airing</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {currentAnime.map(anime => (
               <AnimeCard
                 key={anime.mal_id}
@@ -161,8 +161,8 @@ function Home() {
         </section>
 
         <section className="mb-12"> 
-          <h2 className="text-4xl font-bold mb-8 text-center text-indigo-700 dark:text-indigo-400">📅 Upcoming Anime</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <h2 className="h-home">📅 Upcoming Anime</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {upcomingAnime.map(anime => (
               <AnimeCard
                 key={anime.mal_id}
