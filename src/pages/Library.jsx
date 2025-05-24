@@ -62,19 +62,35 @@ function Library() {
   return (
     <div data-theme={theme} className="min-h-screen bg-amber-50 dark:bg-neutral-900 py-6">
       <div className="container mx-auto px-4">
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-8"> {/* Increased bottom margin */}
+          <div className="relative inline-block"> {/* Wrapper for custom arrow */}
             <select
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 p-3 rounded-lg shadow-md focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 border border-gray-300 dark:border-gray-700"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              className="appearance-none w-64 bg-white dark:bg-gray-700 
+                         text-gray-800 dark:text-gray-100 
+                         py-3 px-5 pr-10  /* Increased padding, pr for arrow space */
+                         rounded-lg shadow-lg 
+                         border border-gray-300 dark:border-gray-600 
+                         focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400
+                         focus:border-teal-500 dark:focus:border-teal-400
+                         transition-all duration-150 ease-in-out
+                         hover:border-gray-400 dark:hover:border-gray-500"
             >
-            <option value="all">All</option>
-            <option value="watching">Watching</option>
-            <option value="completed">Completed</option>
-            <option value="onHold">On Hold</option>
-            <option value="dropped">Dropped</option>
-            <option value="planToWatch">Plan to Watch</option>
+              <option value="all">All Categories</option>
+              <option value="watching">Currently Watching</option>
+              <option value="completed">Completed</option>
+              <option value="onHold">On Hold</option>
+              <option value="dropped">Dropped</option>
+              <option value="planToWatch">Plan to Watch</option>
             </select>
+            {/* Custom Arrow */}
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700 dark:text-gray-200">
+              <svg className="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+              </svg>
+            </div>
+          </div>
         </div>
     
         {animeList.length > 0 ? (
