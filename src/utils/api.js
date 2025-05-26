@@ -45,10 +45,10 @@ export const fetchAnimeById = async (id) => {
     return null;
   }
 };
-
-export const searchAnime = async (query, limit = 10) => {
+ 
+export const searchAnime = async (query) => {
   try {
-    const res = await fetch(`${BASE_URL}/anime?q=${query}&limit=${limit}`);
+    const res = await fetch(`${BASE_URL}/anime?q=${query}`);
     const data = await res.json();
     return data.data;
   } catch (err) {
@@ -56,6 +56,8 @@ export const searchAnime = async (query, limit = 10) => {
     return [];
   }
 };
+
+
 export const deduplicateAnime = (animeList) => {
   const seen = new Set();
   return animeList.filter(anime => {
