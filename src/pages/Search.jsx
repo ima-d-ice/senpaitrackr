@@ -40,12 +40,6 @@ function Search() {
     () =>
       debounce((value) => {
         setDebouncedQuery(value);
-        if (value) { 
-
-        } 
-        else {
-          setDebouncedQuery("");
-        }
       }, 300),
     []
   );
@@ -94,9 +88,13 @@ function Search() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setDebouncedQuery("");
-    setCurrentPage(1); // Reset to page 1 on new search
-    setSearchQuery(inputValue);
+    debouncedSetQuery.cancel(); // Explicitly cancel any pending debounced calls
+    setDebouncedQuery("");      // Clear the debounced query state immediately
+                                // This will disable the suggestions query if it hasn't fired
+                                // or if it's in flight, React Query will handle it gracefully
+                                // as the `enabled` flag becomes false.
+    setCurrentPage(1);          // Reset to page 1 on new search
+    setSearchQuery(inputValue); // Set the actual search query
   };
 
   const handleSuggestionClick = (anime) => {
