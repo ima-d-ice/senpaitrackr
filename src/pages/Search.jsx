@@ -1,16 +1,29 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useContext, useRef } from "react"; 
 import { debounce } from "lodash";
 import AnimeCard from "../components/AnimeCard";
-import { useContext } from "react";
 import { ThemeContext } from "../context/ThemeContext";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 
-// API fetching functions
-const fetchAnime = async (query, page = 1) => {
-  if (!query) return { data: [], pagination: null }; // Return shape consistent with API response
-  const res = await fetch(`https://api.jikan.moe/v4/anime?q=${query}&page=${page}&limit=12`); // Added limit for consistent page size
+// API fetching function for initial infinite scroll (e.g., top anime)
+const fetchInitialAnimeList = async ({ pageParam = 1 }) => {
+  // Using Jikan's top anime endpoint as an example for the initial list
+  const res = await fetch(`https://api.jikan.moe/v4/top/anime?page=${pageParam}&limit=12&sfw=true`);
   if (!res.ok) {
-    throw new Error(`HTTP error! status: ${res.status}`);
+    throw new Error(`HTTP error! status: ${res.status} for initial list`);
+  }
+  const responseData = await res.json();
+  return {
+    data: responseData.data || [],
+    pagination: responseData.pagination || null, 
+  };
+};
+
+// API fetching function for search results (paginated)
+const fetchSearchedAnime = async (query, page = 1) => {
+  if (!query) return { data: [], pagination: null };
+  const res = await fetch(`https://api.jikan.moe/v4/anime?q=${query}&page=${page}&limit=12&sfw=true`);
+  if (!res.ok) {
+    throw new Error(`HTTP error! status: ${res.status} for search`);
   }
   const responseData = await res.json();
   return {
@@ -19,9 +32,10 @@ const fetchAnime = async (query, page = 1) => {
   };
 };
 
+// API fetching function for suggestions
 const fetchAnimeSuggestionsAPI = async (query) => {
   if (!query) return [];
-  const res = await fetch(`https://api.jikan.moe/v4/anime?q=${query}&limit=5`);
+  const res = await fetch(`https://api.jikan.moe/v4/anime?q=${query}&limit=5&sfw=true`);
   if (!res.ok) {
     throw new Error(`HTTP error! status: ${res.status} for suggestions`);
   }
@@ -34,77 +48,138 @@ function Search() {
   const [inputValue, setInputValue] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1); // State for current page
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const loadMoreRef = useRef(null);
 
   const debouncedSetQuery = useMemo(
-    () =>
-      debounce((value) => {
-        setDebouncedQuery(value);
-      }, 300),
+    () => debounce((value) => setDebouncedQuery(value), 300),
     []
   );
 
   useEffect(() => {
-    return () => {
-      debouncedSetQuery.cancel();
-    };
+    return () => debouncedSetQuery.cancel();
   }, [debouncedSetQuery]);
 
   const handleChange = (e) => {
     const value = e.target.value;
     setInputValue(value);
     debouncedSetQuery(value);
-    if (!value) { 
-        setSearchQuery("");
-        setCurrentPage(1); // Reset to page 1 on new search
+    if (!value) {
+      setSearchQuery(""); // Clear search query to show initial list
+      setCurrentPage(1);
+      // No need to reset debouncedQuery here, suggestions will hide if input is empty
     }
   };
 
+  // --- Infinite Scroll for Initial Load ---
+  const {
+    data: initialData,
+    fetchNextPage: fetchNextInitialPage,
+    hasNextPage: hasNextInitialPage,
+    isFetchingNextPage: isFetchingNextInitialPage,
+    isLoading: isLoadingInitial,
+    error: initialError,
+  } = useInfiniteQuery({
+    queryKey: ["initialAnimeList"],
+    queryFn: fetchInitialAnimeList,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.pagination?.has_next_page) {
+        return (lastPage.pagination.current_page || 0) + 1;
+      }
+      return undefined;
+    },
+    enabled: !searchQuery, // Active when no search query
+    staleTime: 1000 * 60 * 15, // Cache initial list longer
+  });
+  // Flatten all fetched pages
+  const allFetchedAnime = useMemo(() => {
+    return initialData?.pages.flatMap(page => page.data) || [];
+  }, [initialData]);
+
+  // Memoized and de-duplicated list for display
+  const initialAnimeToDisplay = useMemo(() => {
+    const uniqueAnime = new Map();
+    allFetchedAnime.forEach(anime => {
+      if (anime && anime.mal_id) { // Ensure anime and mal_id exist
+        // Add to map if not already present, ensuring uniqueness by mal_id
+        if (!uniqueAnime.has(anime.mal_id)) {
+          uniqueAnime.set(anime.mal_id, anime);
+        }
+      }
+    });
+    return Array.from(uniqueAnime.values());
+  }, [allFetchedAnime]);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    if (!loadMoreRef.current || searchQuery) return; // Don't observe if ref not set or if searching
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextInitialPage && !isFetchingNextInitialPage) {
+          fetchNextInitialPage();
+        }
+      },
+      { threshold: 1.0 } // Trigger when 100% of the element is visible
+    );
+
+    const currentLoadMoreRef = loadMoreRef.current; // Capture the current value
+    if (currentLoadMoreRef) {
+      observer.observe(currentLoadMoreRef);
+    }
+
+    return () => {
+      if (currentLoadMoreRef) { // Use the captured value in cleanup
+        observer.unobserve(currentLoadMoreRef);
+      }
+    };
+  }, [hasNextInitialPage, isFetchingNextInitialPage, fetchNextInitialPage, searchQuery, initialAnimeToDisplay]); // Re-run if these change
+
+
+  // --- Paginated Search Results ---
+  const {
+    data: searchResultsData,
+    isLoading: isLoadingSearchResults,
+    isFetching: isFetchingSearchResults,
+    error: searchResultsError,
+  } = useQuery({
+    queryKey: ["animeSearch", searchQuery, currentPage],
+    queryFn: () => fetchSearchedAnime(searchQuery, currentPage),
+    enabled: !!searchQuery, // Active when there IS a search query
+    staleTime: 1000 * 60 * 10,
+    keepPreviousData: true,
+  });
+  const searchedAnimeToDisplay = searchResultsData?.data || [];
+  const paginationInfo = searchResultsData?.pagination;
+
+  // --- Suggestions ---
   const {
     data: suggestions = [],
     isLoading: isLoadingSuggestions,
+    error: suggestionsError, // Add error state
   } = useQuery({
     queryKey: ["animeSuggestions", debouncedQuery],
     queryFn: () => fetchAnimeSuggestionsAPI(debouncedQuery),
-    enabled: !!debouncedQuery,
+    enabled: !!debouncedQuery && !!inputValue, // Only show if actively typing
     staleTime: 1000 * 60 * 5,
   });
 
-  const {
-    data: searchData, // Contains { data: results, pagination: paginationInfo }
-    isLoading: isLoadingResults,
-    isFetching: isFetchingResults,
-    error: resultsError,
-  } = useQuery({
-    queryKey: ["animeSearch", searchQuery, currentPage], // Add currentPage to queryKey
-    queryFn: () => fetchAnime(searchQuery, currentPage),
-    enabled: !!searchQuery,
-    staleTime: 1000 * 60 * 10,
-    keepPreviousData: true, // Useful for smoother pagination
-  });
-
-  const results = searchData?.data || [];
-  const paginationInfo = searchData?.pagination;
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    debouncedSetQuery.cancel(); // Explicitly cancel any pending debounced calls
-    setDebouncedQuery("");      // Clear the debounced query state immediately
-                                // This will disable the suggestions query if it hasn't fired
-                                // or if it's in flight, React Query will handle it gracefully
-                                // as the `enabled` flag becomes false.
-    setCurrentPage(1);          // Reset to page 1 on new search
-    setSearchQuery(inputValue); // Set the actual search query
+    debouncedSetQuery.cancel();
+    setDebouncedQuery(""); // Clear debounced for suggestions
+    setCurrentPage(1);
+    setSearchQuery(inputValue); // This triggers the search view
   };
 
   const handleSuggestionClick = (anime) => {
     setInputValue(anime.title);
+    debouncedSetQuery.cancel();
     setDebouncedQuery("");
-    setCurrentPage(1); // Reset to page 1 on new search from suggestion
-    setSearchQuery(anime.title);
+    setCurrentPage(1);
+    setSearchQuery(anime.title); // This triggers the search view
   };
-  
-  const displayResults = searchQuery ? results : [];
 
   const handleNextPage = () => {
     if (paginationInfo?.has_next_page) {
@@ -125,7 +200,6 @@ function Search() {
                           transition-all duration-300 ease-in-out 
                           focus-within:ring-2 focus-within:ring-teal-500 dark:focus-within:ring-teal-400 
                           focus-within:ring-offset-2 focus-within:ring-offset-amber-50 dark:focus-within:ring-offset-neutral-900">
-            
             <input
               type="text"
               value={inputValue}
@@ -148,7 +222,10 @@ function Search() {
           </div>
         </form>
 
-        {debouncedQuery && suggestions.length > 0 && !isLoadingSuggestions && (
+        {suggestionsError && ( // Display suggestion error
+          <p className="text-center text-sm text-red-500 mb-4">Error loading suggestions. Please try again.</p>
+        )}
+        {debouncedQuery && inputValue && suggestions.length > 0 && !isLoadingSuggestions && !suggestionsError && (
           <div className="bg-white dark:bg-gray-800 shadow-md p-4 rounded mb-6">
             <h3 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">Suggestions:</h3>
             <ul>
@@ -164,52 +241,95 @@ function Search() {
             </ul>
           </div>
         )}
-        {isLoadingSuggestions && debouncedQuery && <p className="text-center text-sm text-gray-500 dark:text-gray-400">Loading suggestions...</p>}
+        {isLoadingSuggestions && debouncedQuery && inputValue && <p className="text-center text-sm text-gray-500 dark:text-gray-400">Loading suggestions...</p>}
 
-        {(isLoadingResults || isFetchingResults) && searchQuery && <p className="text-center text-lg font-medium text-gray-700 dark:text-gray-300">Loading...</p>}
-        {resultsError && <p className="text-center text-red-500">Error fetching results: {resultsError.message}</p>}
+        {!searchQuery ? (
+          // --- Initial Load / Infinite Scroll View ---
+          <>
+            {isLoadingInitial && initialAnimeToDisplay.length === 0 && <p className="text-center text-lg font-medium text-gray-700 dark:text-gray-300">Loading anime...</p>}
+            {initialError && <p className="text-center text-red-500">Error loading anime: {initialError.message}</p>}
+            {!isLoadingInitial && !initialError && initialAnimeToDisplay.length === 0 && (
+              <p className="text-center text-lg font-medium text-gray-700 dark:text-gray-300">No anime found.</p>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4 justify-items-center">
+              {initialAnimeToDisplay.map((anime) => (
+                <AnimeCard
+                  key={`${anime.mal_id}-initial`}
+                  id={anime.mal_id}
+                  name={anime.title}
+                  src={anime.images?.jpg?.image_url}
+                  score={anime.score}
+                  episodes={anime.episodes}
+                  type={anime.type}
+                />
+              ))}
+            </div>
+            {/* Element to observe for infinite scroll */}
+            <div ref={loadMoreRef} style={{ height: "1px" }}></div> 
 
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4 justify-items-center">
-          {Array.from(
-            new Map(displayResults.map(item => [item.mal_id, item])).values()
-          ).map((anime) => (
-            <AnimeCard
-              key={anime.mal_id}
-              id={anime.mal_id}
-              name={anime.title}
-              src={anime.images.jpg.image_url}
-              score={anime.score}
-              episodes={anime.episodes}
-              type={anime.type}
-            />
-          ))}
-        </div>
-        {!isLoadingResults && !isFetchingResults && searchQuery && displayResults.length === 0 && (
-            <p className="text-center text-lg font-medium text-gray-700 dark:text-gray-300">No results found for "{searchQuery}".</p>
-        )}
-
-        {/* Pagination Controls */}
-        {searchQuery && results.length > 0 && paginationInfo && (
-          <div className="flex justify-center items-center space-x-4 my-8">
-            <button
-              onClick={handlePrevPage}
-              disabled={currentPage === 1 || isLoadingResults || isFetchingResults}
-              className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-md disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-colors"
-            >
-              Previous
-            </button>
-            <span className="text-gray-700 dark:text-gray-300">
-              Page {paginationInfo.current_page || currentPage} 
-              {paginationInfo.last_visible_page && ` of ${paginationInfo.last_visible_page}`}
-            </span>
-            <button
-              onClick={handleNextPage}
-              disabled={!paginationInfo?.has_next_page || isLoadingResults || isFetchingResults}
-              className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-md disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-colors"
-            >
-              Next
-            </button>
-          </div>
+            {isFetchingNextInitialPage && (
+              <p className="text-center text-gray-500 dark:text-gray-400 my-8">Loading more...</p>
+            )}
+            {!isFetchingNextInitialPage && !hasNextInitialPage && initialAnimeToDisplay.length > 0 && (
+                <p className="text-center text-gray-500 dark:text-gray-400 my-8">You've seen it all!</p>
+            )}
+            {/* Fallback button, can be removed if infinite scroll is preferred solely */}
+            {hasNextInitialPage && !isFetchingNextInitialPage && (
+                 <div className="flex justify-center my-8">
+                    <button
+                        onClick={() => fetchNextInitialPage()}
+                        className="px-6 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-md transition-colors"
+                    >
+                        Load More Anime (Fallback)
+                    </button>
+                </div>
+            )}
+          </>
+        ) : (
+          // --- Search Results View ---
+          <>
+            {(isLoadingSearchResults || isFetchingSearchResults) && <p className="text-center text-lg font-medium text-gray-700 dark:text-gray-300">Loading search results...</p>}
+            {searchResultsError && <p className="text-center text-red-500">Error fetching results: {searchResultsError.message}</p>}
+            
+            {!isLoadingSearchResults && !isFetchingSearchResults && searchedAnimeToDisplay.length === 0 && !searchResultsError && (
+              <p className="text-center text-lg font-medium text-gray-700 dark:text-gray-300">No results found for "{searchQuery}".</p>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4 justify-items-center">
+              {searchedAnimeToDisplay.map((anime) => (
+                 <AnimeCard
+                    key={`${anime.mal_id}-search`}
+                    id={anime.mal_id}
+                    name={anime.title}
+                    src={anime.images?.jpg?.image_url}
+                    score={anime.score}
+                    episodes={anime.episodes}
+                    type={anime.type}
+                />
+              ))}
+            </div>
+            {searchedAnimeToDisplay.length > 0 && paginationInfo && (
+              <div className="flex justify-center items-center space-x-4 my-8">
+                <button
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1 || isLoadingSearchResults || isFetchingSearchResults}
+                  className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-md disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-colors"
+                >
+                  Previous
+                </button>
+                <span className="text-gray-700 dark:text-gray-300">
+                  Page {paginationInfo.current_page || currentPage} 
+                  {paginationInfo.last_visible_page && ` of ${paginationInfo.last_visible_page}`}
+                </span>
+                <button
+                  onClick={handleNextPage}
+                  disabled={!paginationInfo?.has_next_page || isLoadingSearchResults || isFetchingSearchResults}
+                  className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-md disabled:bg-gray-400 dark:disabled:bg-gray-600 transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
