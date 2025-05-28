@@ -1,10 +1,8 @@
-import React from 'react'
-import { useState } from 'react'
-import { useEffect } from 'react'
-import { useContext } from 'react'
-import { ThemeContext } from '../context/ThemeContext'
+import React, { useState, useEffect, useContext, useMemo } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
+import Filter from '../components/Filter'; // Import Filter component
+import AnimeList from '../components/AnimeList';
 
-import AnimeList from '../components/AnimeList'
 const getAnimeList = (value, library) => {
   switch (value) {
     case 'watching':
@@ -36,22 +34,25 @@ const getLibrary = () =>
     dropped: [],
     planToWatch: [],
   };
+
 function Library() {
     const { theme } = useContext(ThemeContext);
-    const [value, setValue] = useState('all');
-      const [library, setLibrary] = useState(getLibrary());
+    const [value, setValue] = useState('all'); // For category filter
+    const [library, setLibrary] = useState(getLibrary());
+    const [activeFilters, setActiveFilters] = useState({
+        genre: "",
+        year: "",
+        type: "",
+    });
+
+    const handleFilterChange = (newFilters) => {
+        setActiveFilters(newFilters);
+    };
     
-      const rawAnimeList = getAnimeList(value, library); // ✅ derived value
-      const animeList = Array.from(
-        new Map(rawAnimeList.map(item => [item.id, item])).values()
-      );
-     
-     
-      useEffect(() => {
+    useEffect(() => {
         const handleLibraryUpdate = () => {
           const updatedLibrary = getLibrary();
           setLibrary(updatedLibrary);
-          
         };
     
         window.addEventListener('libraryUpdated', handleLibraryUpdate);
@@ -59,12 +60,38 @@ function Library() {
           window.removeEventListener('libraryUpdated', handleLibraryUpdate);
         };
       }, []);
+
+    const rawAnimeListForCategory = getAnimeList(value, library);
+
+    const finalAnimeList = useMemo(() => {
+        let list = Array.from(
+            new Map(rawAnimeListForCategory.map(item => [item.id || item.mal_id, item])).values()
+        );
+
+        if (activeFilters.genre) {
+            list = list.filter(anime =>
+                anime.genres && anime.genres.some(genreName => 
+                    genreName && genreName.toLowerCase() === activeFilters.genre.toLowerCase()
+                )
+            );
+        }
+        if (activeFilters.year) {
+            list = list.filter(anime => {
+                const animeYear = anime.year || (anime.aired && new Date(anime.aired.from).getFullYear());
+                return animeYear === parseInt(activeFilters.year);
+            });
+        }
+        if (activeFilters.type) {
+            list = list.filter(anime => anime.type === activeFilters.type);
+        }
+        return list;
+    }, [rawAnimeListForCategory, activeFilters]);
     
   return (
     <div data-theme={theme} className="min-h-screen bg-amber-50 dark:bg-neutral-900 py-6">
       <div className="container mx-auto px-4">
-        <div className="flex justify-center mb-8"> {/* Increased bottom margin */}
-          <div className="relative inline-block"> {/* Wrapper for custom arrow */}
+        <div className="flex justify-center mb-8">
+          <div className="relative inline-block">
             <select
               value={value}
               onChange={(e) => setValue(e.target.value)}
@@ -93,9 +120,11 @@ function Library() {
             </div>
           </div>
         </div>
+
+        <Filter onFilterChange={handleFilterChange} />
     
-        {animeList.length > 0 ? (
-          <AnimeList animeList={animeList} />
+        {finalAnimeList.length > 0 ? (
+          <AnimeList animeList={finalAnimeList} />
         ) : (
           <div className="text-center text-gray-500 dark:text-gray-400 mt-10">
             <p className="text-xl">Your library is empty in this category.</p>
@@ -107,4 +136,4 @@ function Library() {
   )
 }
 
-export default Library
+export default Library;
