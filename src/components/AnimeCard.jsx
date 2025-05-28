@@ -7,11 +7,10 @@ import { ThemeContext } from '../context/ThemeContext';
 import { useContext } from 'react';
 
 
-function AnimeCard({ id, name, src, score, episodes, type, watchType = "not_added"}) {
+function AnimeCard({ id, name, src, score, episodes, type, watchType = "not_added", year, genres }) {
     const [selectedCategory, setSelectedCategory] = useState(watchType);
     const {theme} = useContext(ThemeContext);
     useEffect(() => {
-      // Use getAnimeFromLibrary to find the anime's status
       const animeInLibrary = getAnimeFromLibrary(id);
       if (animeInLibrary) {
         setSelectedCategory(animeInLibrary.watchType);
@@ -24,13 +23,30 @@ function AnimeCard({ id, name, src, score, episodes, type, watchType = "not_adde
         const newCategory = e.target.value;
         setSelectedCategory(newCategory);
 
+        let genresForStorage = [];
+        if (genres && Array.isArray(genres) && genres.length > 0) {
+            // If the first element is a string, assume it's already an array of genre names
+            if (typeof genres[0] === 'string') {
+                genresForStorage = genres;
+            }
+            // Else, if it's an object with a 'name' property, map to get names
+            else if (typeof genres[0] === 'object' && genres[0] !== null && Object.prototype.hasOwnProperty.call(genres[0], 'name')) {
+                genresForStorage = genres.map(g => g.name).filter(name => typeof name === 'string'); // Ensure only strings
+            }
+            // Add other conditions or fallbacks if genres can have other structures
+        } else if (genres && Array.isArray(genres)) { // Handle empty genres array
+            genresForStorage = [];
+        }
+
         const animeObjectForStorage = {
             mal_id: id,
             title: name,
             images: { jpg: { large_image_url: src } },
             score: score,
             episodes: episodes,
-            type: type
+            type: type,
+            year : year,
+            genres : genresForStorage // Use the correctly processed genres
         };
 
       

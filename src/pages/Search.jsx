@@ -261,6 +261,8 @@ function Search() {
                   score={anime.score}
                   episodes={anime.episodes}
                   type={anime.type}
+                year={anime.year}
+                genres={anime.genres}
                 />
               ))}
             </div>
@@ -304,6 +306,8 @@ function Search() {
                     score={anime.score}
                     episodes={anime.episodes}
                     type={anime.type}
+                    year={anime.year}
+                    genres={anime.genres}
                 />
               ))}
             </div>

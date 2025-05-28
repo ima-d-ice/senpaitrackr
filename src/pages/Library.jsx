@@ -45,12 +45,13 @@ function Library() {
       const animeList = Array.from(
         new Map(rawAnimeList.map(item => [item.id, item])).values()
       );
-    
+     
      
       useEffect(() => {
         const handleLibraryUpdate = () => {
           const updatedLibrary = getLibrary();
           setLibrary(updatedLibrary);
+          
         };
     
         window.addEventListener('libraryUpdated', handleLibraryUpdate);

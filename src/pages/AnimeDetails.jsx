@@ -62,7 +62,17 @@ export default function AnimeDetails() {
   useEffect(() => {
     
     if (category && anime && anime.mal_id) {
-      addToLibrary(category, anime, rating, episodesWatched);
+      const propAnime = {
+        mal_id: anime.mal_id,
+        title: anime.title,
+        images: anime.images,
+        score: anime.score,
+        episodes: anime.episodes,
+        type: anime.type,
+        year: anime.year,
+        genres: anime.genres.map(g => g.name) // Ensure genres are stored as an array of strings,
+      };
+      addToLibrary(category, propAnime, rating, episodesWatched);
     }
   }, [category, anime, rating, episodesWatched]); 
 

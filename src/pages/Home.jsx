@@ -121,6 +121,11 @@ function Home() {
                 score={randomRec.score}
                 episodes={randomRec.episodes}
                 type={randomRec.type}
+                year = {randomRec.year}
+                genres={randomRec.genres}
+
+
+
               />
             </div>
           </div>
@@ -138,6 +143,9 @@ function Home() {
                 score={anime.score}
                 episodes={anime.episodes}
                 type={anime.type}
+                year={anime.year}
+                genres={anime.genres}
+
               />
             ))}
           </div>
@@ -155,6 +163,8 @@ function Home() {
                 score={anime.score}
                 episodes={anime.episodes}
                 type={anime.type}
+                year={anime.year}
+                genres={anime.genres}
               />
             ))}
           </div>
@@ -172,6 +182,8 @@ function Home() {
                 score={anime.score}
                 episodes={anime.episodes}
                 type={anime.type}
+                year={anime.year}
+                genres={anime.genres}
               />
             ))}
           </div>

@@ -21,6 +21,8 @@ function AnimeList(props) {
               episodes={prop.episodes}
               type={prop.type}
               watchType={prop.watchType} 
+              year={prop.year}
+              genres={prop.genres}
             />
         ))}
 
