@@ -69,7 +69,7 @@ const Navbar = () => {
           </button>
           {user ? (
             <>
-              <span className="text-sm text-gray-700 dark:text-gray-300 hidden sm:inline">Welcome, {user.email || 'User'}</span>
+              
               <button
                 onClick={handleSignOut}
                 className="px-3 py-2 rounded-lg font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors duration-300 text-sm"
