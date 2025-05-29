@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { ThemeContext } from '../context/ThemeContext';
 import Filter from '../components/Filter'; // Import Filter component
 import AnimeList from '../components/AnimeList';
@@ -17,6 +18,7 @@ const getAnimeList = (category, library) => {
 
 function Library() {
     const { theme } = useContext(ThemeContext);
+    const navigate = useNavigate(); // Initialize useNavigate
     const [value, setValue] = useState('all'); // For category filter
     const [library, setLibrary] = useState({
         watching: [],
@@ -75,7 +77,12 @@ function Library() {
                 });
 
                 // Return the unsubscribe function for onSnapshot
-                return () => snapshotUnsubscribe();
+                // Ensure this is correctly scoped if snapshotUnsubscribe might not be initialized
+                return () => {
+                    if (typeof snapshotUnsubscribe === 'function') {
+                        snapshotUnsubscribe();
+                    }
+                };
 
             } else {
                 // User is signed out, clear the library
@@ -86,12 +93,13 @@ function Library() {
                     dropped: [],
                     planToWatch: [],
                 });
+                navigate('/login'); // Redirect to login page
             }
         });
 
         // Cleanup auth subscription on unmount
         return () => authUnsubscribe();
-    }, []);
+    }, [navigate]); // Add navigate to the dependency array
 
 
 
