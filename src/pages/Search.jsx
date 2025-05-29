@@ -228,10 +228,7 @@ function Search() {
     staleTime: 1000 * 60 * 10,
     keepPreviousData: true,
   });
-  const clientFilteredSearchedAnime = useMemo(() => {
-    return searchResultsData?.data || []; // Directly use API response
-  }, [searchResultsData]); // REMOVE THIS OR SIMPLIFY AS SHOWN
-  
+
   const searchedAnimeToDisplay = searchResultsData?.data || []; // Directly use API filtered data
   const paginationInfo = searchResultsData?.pagination;
 

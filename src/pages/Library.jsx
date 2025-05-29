@@ -2,43 +2,29 @@ import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import Filter from '../components/Filter'; // Import Filter component
 import AnimeList from '../components/AnimeList';
+import { auth } from '../config/firebase';
+import { collection, onSnapshot } from "firebase/firestore"; 
+import { db } from "../config/firebase"; 
 
-const getAnimeList = (value, library) => {
-  switch (value) {
-    case 'watching':
-      return library.watching;
-    case 'completed':
-      return library.completed;
-    case 'onHold':
-      return library.onHold;
-    case 'dropped':
-      return library.dropped;
-    case 'planToWatch':
-      return library.planToWatch;
-    default:
-      return [
-        ...library.watching,
-        ...library.completed,
-        ...library.onHold,
-        ...library.dropped,
-        ...library.planToWatch,
-      ];
+const getAnimeList = (category, library) => {
+  if (!library) return [];
+  if (category === 'all') {
+    // Combine all lists from the library object
+    return Object.values(library).flat();
   }
+  return library[category] || [];
 };
-
-const getLibrary = () =>
-  JSON.parse(localStorage.getItem('animeLibrary')) || {
-    watching: [],
-    completed: [],
-    onHold: [],
-    dropped: [],
-    planToWatch: [],
-  };
 
 function Library() {
     const { theme } = useContext(ThemeContext);
     const [value, setValue] = useState('all'); // For category filter
-    const [library, setLibrary] = useState(getLibrary());
+    const [library, setLibrary] = useState({
+        watching: [],
+        completed: [],
+        onHold: [],
+        dropped: [],
+        planToWatch: [],
+    });
     const [activeFilters, setActiveFilters] = useState({
         genre: "",
         year: "",
@@ -49,17 +35,65 @@ function Library() {
         setActiveFilters(newFilters);
     };
     
-    useEffect(() => {
-        const handleLibraryUpdate = () => {
-          const updatedLibrary = getLibrary();
-          setLibrary(updatedLibrary);
-        };
     
-        window.addEventListener('libraryUpdated', handleLibraryUpdate);
-        return () => {
-          window.removeEventListener('libraryUpdated', handleLibraryUpdate);
-        };
-      }, []);
+    useEffect(() => {
+        const authUnsubscribe = auth.onAuthStateChanged(user => {
+            if (user) {
+                const libraryCollectionRef = collection(db, "users", user.uid, "animeLibrary");
+                
+                const snapshotUnsubscribe = onSnapshot(libraryCollectionRef, (snapshot) => {
+                    console.log("onSnapshot triggered. Tab ID:", Math.random().toString(36).substring(7)); // Helps distinguish tab logs
+                    
+                    snapshot.docChanges().forEach((change) => {
+                        console.log("Change type:", change.type, "Doc ID:", change.doc.id, "Data:", change.doc.data());
+                    });
+
+                    const firestoreLibrary = {
+                        watching: [],
+                        completed: [],
+                        onHold: [],
+                        dropped: [],
+                        planToWatch: [],
+                    };
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.watchType && firestoreLibrary[data.watchType]) {
+                            firestoreLibrary[data.watchType].push(data);
+                        }
+                    });
+                    console.log("New firestoreLibrary to be set:", JSON.parse(JSON.stringify(firestoreLibrary))); // Deep copy for logging
+                    setLibrary(firestoreLibrary);
+                }, (error) => {
+                    console.error("Error listening to library updates:", error);
+                    setLibrary({ // Reset or handle error state
+                        watching: [],
+                        completed: [],
+                        onHold: [],
+                        dropped: [],
+                        planToWatch: [],
+                    });
+                });
+
+                // Return the unsubscribe function for onSnapshot
+                return () => snapshotUnsubscribe();
+
+            } else {
+                // User is signed out, clear the library
+                setLibrary({
+                    watching: [],
+                    completed: [],
+                    onHold: [],
+                    dropped: [],
+                    planToWatch: [],
+                });
+            }
+        });
+
+        // Cleanup auth subscription on unmount
+        return () => authUnsubscribe();
+    }, []);
+
+
 
     const rawAnimeListForCategory = getAnimeList(value, library);
 
