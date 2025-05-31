@@ -12,6 +12,7 @@ import { getLibrary } from '../utils/storage';
 import { ThemeContext } from '../context/ThemeContext';
 
 import { useContext } from 'react';
+import bgVideo from '../assets/bg.mp4'; // Import the video
 
 
 function Home() {
@@ -78,7 +79,16 @@ function Home() {
     <div className="min-h-screen bg-amber-50 dark:bg-neutral-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
      
       <section className="relative text-center py-24 sm:py-32 px-4 bg-amber-50 dark:bg-neutral-900 overflow-hidden">
-        
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="absolute z-0 w-full h-full top-0 left-0 object-cover"
+        >
+          <source src={bgVideo} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
         
         <div className="relative z-10 max-w-3xl mx-auto">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-blue-600 dark:from-teal-400 dark:to-blue-500">
