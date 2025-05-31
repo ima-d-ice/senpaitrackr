@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
+@layer base {
+  @apply bg-white text-gray-900 dark:bg-gray-800 dark:text-gray-200;
+  
+  body {
+    @apply overscroll-none;
+  }
+
+}
+
 @layer components {
   .dark {
     @apply dark:bg-gray-900 dark:text-white;

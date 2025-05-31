@@ -35,25 +35,25 @@ const Navbar = () => {
   return (
     
     <div data-theme = {theme} >
-    <nav className="bg-amber-50 dark:bg-neutral-900 p-4 shadow-lg">
+    <nav className="sticky top-0 z-50 bg-teal-900 dark:bg-teal-950 backdrop-blur-lg p-4 shadow-md border-b border-teal-50 dark:border-teal-700/50">
       <div className="container mx-auto flex justify-between items-center">
         {/* Left side: Links */}
         <div className="flex items-center space-x-4">
           <Link
             to="/"
-            className="nav-link-custom text-gray-800 dark:text-gray-200 hover:text-teal-600 dark:hover:text-teal-400"
+            className="nav-link-custom text-gray-300 hover:text-gray-100 font-medium"
           >
             Home
           </Link>
           <Link
             to="/search"
-            className="nav-link-custom text-gray-800 dark:text-gray-200 hover:text-teal-600 dark:hover:text-teal-400"
+            className="nav-link-custom text-gray-300 hover:text-gray-100 font-medium"
           >
             Search
           </Link>
           <Link
             to="/library"
-            className="nav-link-custom text-gray-800 dark:text-gray-200 hover:text-teal-600 dark:hover:text-teal-400"
+            className="nav-link-custom text-gray-300 hover:text-gray-100 font-medium"
           >
             Library
           </Link>
@@ -63,7 +63,7 @@ const Navbar = () => {
         <div className="flex items-center space-x-4">
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-md text-gray-800 dark:text-gray-200 transition-all duration-300 ease-in-out hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="p-2 rounded-full text-gray-700 dark:text-gray-300 hover:-translate-y-1 transition-all duration-300 ease-in-out"
           >
             {theme === 'light' ? '🌙' : '☀️'} {/* Corrected icons for clarity */}
           </button>
@@ -72,7 +72,7 @@ const Navbar = () => {
               
               <button
                 onClick={handleSignOut}
-                className="px-3 py-2 rounded-lg font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors duration-300 text-sm"
+                className="px-4 py-2 rounded-lg font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors duration-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 dark:focus:ring-offset-neutral-800"
               >
                 Logout
               </button>
@@ -80,7 +80,7 @@ const Navbar = () => {
           ) : (
             <Link
               to="/login"
-              className="px-3 py-2 rounded-lg font-semibold text-white bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-500 transition-colors duration-300 text-sm"
+              className="px-4 py-2 rounded-lg font-semibold text-white bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-500 transition-colors duration-300 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 dark:focus:ring-offset-neutral-800"
             >
               Login
             </Link>
