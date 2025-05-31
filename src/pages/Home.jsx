@@ -22,7 +22,7 @@ function Home() {
   const [currentAnime, setCurrentAnime] = useState([]);
   const [upcomingAnime, setUpcomingAnime] = useState([]);
   const [randomRec, setRandomRec] = useState(null);
-  const [randomQuote, setRandomQuote] = useState("");
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,14 +61,7 @@ function Home() {
         setRandomRec(rand);
       }
 
-      const animeQuotes = [
-        "Power comes in response to a need, not a desire. — Goku",
-        "Fear is not evil. It tells you what your weakness is. — Gildarts Clive",
-        "A lesson without pain is meaningless. — Edward Elric",
-        "In our society, letting others find out that you're a nice guy is a very risky move. — Hitagi Senjougahara",
-        "Hard work is worthless for those that don’t believe in themselves. — Naruto Uzumaki"
-      ];
-      setRandomQuote(animeQuotes[Math.floor(Math.random() * animeQuotes.length)]);
+     
     };
 
     fetchData();
@@ -76,9 +69,9 @@ function Home() {
 
   return (
     <div data-theme = {theme}>
-    <div className="min-h-screen bg-amber-50 dark:bg-neutral-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-green-90 to-teal-150 dark:from-neutral-900 dark:to-teal-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
      
-      <section className="relative text-center py-24 sm:py-32 px-4 bg-amber-50 dark:bg-neutral-900 overflow-hidden">
+      <section className="relative text-center py-20 sm:py-32 px-4 bg-amber-50 dark:bg-neutral-900 overflow-hidden">
         <video 
           autoPlay 
           loop 
@@ -90,28 +83,24 @@ function Home() {
           Your browser does not support the video tag.
         </video>
         
-        <div className="relative z-10 max-w-3xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-blue-600 dark:from-teal-400 dark:to-blue-500">
+        <div className="relative z-10 max-w-3xl mx-auto ">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-teal-950 to-emerald-800 ">
             Welcome to senpaiTraCkr
           </h1>
-          <p className="mb-8 text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-xl mx-auto">
+          <p className="mb-8 text-lg sm:text-xl max-w-xl  mt-5 mx-auto text-transparent bg-clip-text bg-gradient-to-r from-teal-950 to-emerald-800 ">
             Your personal dashboard to track, discover, and enjoy anime.
           </p>
-          {randomQuote && (
-            <blockquote className="mb-10 italic text-sm text-gray-500 dark:text-gray-400 border-l-4 border-teal-500 dark:border-teal-400 pl-4 py-2 inline-block">
-              "{randomQuote}"
-            </blockquote>
-          )}
+          
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6">
             <Link 
               to="/search" 
-              className="w-full sm:w-auto px-8 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 dark:from-teal-600 dark:to-blue-700 dark:hover:from-teal-500 dark:hover:to-blue-600 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50"
+              className="w-full sm:w-auto px-8 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-teal-500 to-emerald-900 hover:from-teal-600 hover:to-emerald-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50"
             >
               Search Anime
             </Link>
             <Link 
               to="/library" 
-              className="w-full sm:w-auto px-8 py-3 rounded-lg font-semibold text-teal-600 dark:text-teal-400 bg-transparent border-2 border-teal-500 dark:border-teal-400 hover:bg-teal-500 hover:text-white dark:hover:bg-teal-400 dark:hover:text-slate-900 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50"
+              className="w-full sm:w-auto px-8 py-3 rounded-lg font-semibold border-teal-500 bg-teal-900 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50"
             >
               My Library
             </Link>
