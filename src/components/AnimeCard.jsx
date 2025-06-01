@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import { addToLibraryFirestore } from "../utils/firebaseLibrary";
 import { ThemeContext } from '../context/ThemeContext';
+import { getAnimeFromFirestore } from "../utils/firebaseLibrary";
 
 // Add initialUserEpisodesWatched and initialUserRating to props
 function AnimeCard({
@@ -19,6 +20,7 @@ function AnimeCard({
 }) {
     const { theme } = useContext(ThemeContext);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    
 
     // State for the modal form
     const [currentCategory, setCurrentCategory] = useState(watchType);
@@ -46,16 +48,24 @@ function AnimeCard({
         }
     }, [watchType, initialUserEpisodesWatched, initialUserRating, isModalOpen]);
 
-    const handleOpenModal = (e) => {
+    const handleOpenModal = async (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        // Set modal state from props before opening
-        setCurrentCategory(watchType);
-        if (watchType !== "not_added") {
-            setCurrentEpisodesWatched(initialUserEpisodesWatched);
-            setCurrentRating(initialUserRating);
+        // Attempt to fetch the latest data from Firestore
+        const firestoreData = await getAnimeFromFirestore(id); // id is mal_id
+
+        if (firestoreData) {
+            // If data exists in Firestore, use it to populate the modal
+            setCurrentCategory(firestoreData.watchType || "not_added");
+            setCurrentEpisodesWatched(firestoreData.userEpisodes !== undefined ? firestoreData.userEpisodes : 0);
+            setCurrentRating(firestoreData.userRating !== undefined ? firestoreData.userRating : 0);
         } else {
+            // If not in Firestore, set to default "add" state.
+            // The watchType prop might indicate a status from a parent list,
+            // but if Firestore (our source of truth for user data) doesn't have it,
+            // the modal should reflect that it needs to be added.
+            setCurrentCategory("not_added");
             setCurrentEpisodesWatched(0);
             setCurrentRating(0);
         }
@@ -113,7 +123,7 @@ function AnimeCard({
 
                 {/* Overlay for hover effect: shows plus icon */}
                 <div
-                    className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex justify-end items-end p-3 opacity-0 group-hover:opacity-100 pointer-events-none" // Overlay is always non-interactive
+                    className="absolute inset-0 transition-all duration-300 flex justify-end items-end p-3 opacity-0 group-hover:opacity-100 pointer-events-none" // Overlay is always non-interactive
                 >
                     {/* Plus icon to open modal, positioned bottom-right */}
                     <button
