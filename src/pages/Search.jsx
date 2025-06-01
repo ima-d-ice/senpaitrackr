@@ -271,28 +271,30 @@ function Search() {
   };
 
   return (
-    <div className="min-h-screen bg-amber-50 dark:bg-neutral-900 py-8 px-4 md:px-12" data-theme={theme}>
-      <div className="max-w-6xl mx-auto">
+    <div 
+      className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-emerald-50 dark:from-teal-950 dark:via-neutral-950 dark:to-emerald-950 text-gray-900 dark:text-gray-100 transition-colors duration-300 py-8 px-4 md:px-12" 
+      data-theme={theme}
+    >
+      <div className="mx-auto">
         <form onSubmit={handleSubmit} className="mb-8">
-          <div className="flex items-center bg-zinc-300 dark:bg-gray-800 
-                          rounded-full shadow-lg hover:shadow-xl focus-within:shadow-xl 
+          <div className="group flex items-center bg-white/80 dark:bg-slate-700/80 backdrop-blur-sm 
+                          border border-slate-300 dark:border-slate-600 
+                          rounded-2xl shadow-lg hover:shadow-xl 
                           transition-all duration-300 ease-in-out 
                           focus-within:ring-2 focus-within:ring-teal-500 dark:focus-within:ring-teal-400 
-                          focus-within:ring-offset-2 focus-within:ring-offset-amber-50 dark:focus-within:ring-offset-neutral-900">
+                          focus-within:border-teal-500 dark:focus-within:border-teal-400 
+                          focus-within:ring-offset-2 focus-within:ring-offset-green-50 dark:focus-within:ring-offset-neutral-950">
             <input
               type="text"
               value={inputValue}
               onChange={handleChange}
               placeholder="Search anime..."
-              className="flex-grow p-4 pl-5 bg-transparent text-gray-900 dark:text-white focus:outline-none placeholder-gray-500 dark:placeholder-gray-400 text-base"
+              className="flex-grow p-4 pl-6 bg-transparent text-slate-900 dark:text-slate-100 focus:outline-none placeholder-slate-500 dark:placeholder-slate-400 text-base"
             />
             <button
               type="submit"
               aria-label="Search"
-              className="flex items-center justify-center p-4 bg-zinc-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 
-                         text-gray-600 dark:text-gray-300 
-                         rounded-r-full transition-colors duration-200
-                         border-l border-gray-300 dark:border-gray-600"
+              className="flex items-center justify-center p-4 text-slate-500 dark:text-slate-400 group-focus-within:text-teal-600 dark:group-focus-within:text-teal-400 hover:text-teal-600 dark:hover:text-teal-400 focus:outline-none rounded-r-full transition-colors duration-200"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
@@ -335,7 +337,7 @@ function Search() {
              {!isLoadingInitial && !initialError && initialAnimeToDisplay.length === 0 && (activeFilters.genre || activeFilters.year || activeFilters.type) && (
               <p className="text-center text-lg font-medium text-gray-700 dark:text-gray-300">No anime match the current filters.</p>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4 justify-items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 p-4 justify-items-center">
               {initialAnimeToDisplay.map((anime) => (
                 <AnimeCard
                   key={`${anime.mal_id}-initial`}

@@ -130,8 +130,10 @@ function Library() {
     }, [rawAnimeListForCategory, activeFilters]);
     
   return (
-    <div data-theme={theme} className="min-h-screen bg-amber-50 dark:bg-neutral-900 py-6">
+
+    <div data-theme={theme} className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-emerald-50 dark:from-teal-950 dark:via-neutral-950 dark:to-emerald-950 py-6">
       <div className="container mx-auto px-4">
+        <div className="text-center mb-8 flex items-center justify-center sm:flex-col md: flex-row sm:gap-4 md:gap-8">
         <div className="flex justify-center mb-8">
           <div className="relative inline-block">
             <select
@@ -164,6 +166,7 @@ function Library() {
         </div>
 
         <Filter onFilterChange={handleFilterChange} />
+        </div>
     
         {finalAnimeList.length > 0 ? (
           <AnimeList animeList={finalAnimeList} />

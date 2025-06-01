@@ -161,7 +161,7 @@ function Home() {
 
         <section className="mb-16">
           <h2 className="h-home">📺 Currently Airing</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 justify-items-center">
             {currentAnime.map(anime => (
               <AnimeCard
                 key={anime.mal_id}
@@ -180,7 +180,7 @@ function Home() {
 
         <section className="mb-12"> 
           <h2 className="h-home">📅 Upcoming Anime</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 justify-items-center">
             {upcomingAnime.map(anime => (
               <AnimeCard
                 key={anime.mal_id}

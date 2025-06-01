@@ -3,36 +3,69 @@ import { Link } from "react-router-dom";
 import { addToLibraryFirestore } from "../utils/firebaseLibrary";
 import { ThemeContext } from '../context/ThemeContext';
 
-function AnimeCard({ id, name, src, score, episodes, type, watchType = "not_added", year, genres }) {
+// Add initialUserEpisodesWatched and initialUserRating to props
+function AnimeCard({
+    id,
+    name,
+    src,
+    score,
+    episodes,
+    type,
+    watchType = "not_added",
+    year,
+    genres,
+    initialUserEpisodesWatched = 0, // Default to 0 if not provided
+    initialUserRating = 0          // Default to 0 if not provided
+}) {
     const { theme } = useContext(ThemeContext);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // State for the modal form
     const [currentCategory, setCurrentCategory] = useState(watchType);
-    const [currentEpisodesWatched, setCurrentEpisodesWatched] = useState(0);
-    const [currentRating, setCurrentRating] = useState(0);
+    // Initialize state with potentially existing data, or 0 if new/not provided
+    const [currentEpisodesWatched, setCurrentEpisodesWatched] = useState(
+        watchType !== "not_added" ? initialUserEpisodesWatched : 0
+    );
+    const [currentRating, setCurrentRating] = useState(
+        watchType !== "not_added" ? initialUserRating : 0
+    );
 
     useEffect(() => {
+        // This effect runs when the modal is closed or when the props determining
+        // the initial state of the modal (watchType, initialUserEpisodesWatched, initialUserRating) change.
+        // It ensures the form state is correctly reset or re-initialized.
         if (!isModalOpen) {
             setCurrentCategory(watchType);
+            if (watchType !== "not_added") {
+                setCurrentEpisodesWatched(initialUserEpisodesWatched);
+                setCurrentRating(initialUserRating);
+            } else {
+                setCurrentEpisodesWatched(0);
+                setCurrentRating(0);
+            }
+        }
+    }, [watchType, initialUserEpisodesWatched, initialUserRating, isModalOpen]);
+
+    const handleOpenModal = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Set modal state from props before opening
+        setCurrentCategory(watchType);
+        if (watchType !== "not_added") {
+            setCurrentEpisodesWatched(initialUserEpisodesWatched);
+            setCurrentRating(initialUserRating);
+        } else {
             setCurrentEpisodesWatched(0);
             setCurrentRating(0);
         }
-    }, [watchType, isModalOpen]);
-
-    const handleOpenModal = (e) => {
-        e.preventDefault(); 
-        e.stopPropagation(); 
-        
-        setCurrentCategory(watchType); 
-        setCurrentEpisodesWatched(0); 
-        setCurrentRating(0);      
 
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
+        // The useEffect above will handle resetting the state correctly as isModalOpen is now false.
     };
 
     const handleSaveChanges = async () => {
@@ -49,11 +82,14 @@ function AnimeCard({ id, name, src, score, episodes, type, watchType = "not_adde
             mal_id: id,
             title: name,
             images: { jpg: { large_image_url: src } },
-            score, 
-            episodes, 
+            score, // General score from API
+            episodes, // Total episodes from API
             type,
             year,
-            genres: genresForStorage
+            genres: genresForStorage,
+            // Add user-specific tracking data
+            episodesWatched: currentEpisodesWatched,
+            userRating: currentRating
         };
 
         if (currentCategory !== "not_added") {
@@ -77,16 +113,15 @@ function AnimeCard({ id, name, src, score, episodes, type, watchType = "not_adde
 
                 {/* Overlay for hover effect: shows plus icon */}
                 <div
-                    className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex justify-center items-center p-3 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
+                    className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex justify-end items-end p-3 opacity-0 group-hover:opacity-100 pointer-events-none" // Overlay is always non-interactive
                 >
-                    {/* Plus icon to open modal, centered */}
+                    {/* Plus icon to open modal, positioned bottom-right */}
                     <button
                         onClick={handleOpenModal}
-                        className="text-white bg-blue-500 hover:bg-blue-600 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+                        className="text-white bg-blue-500 hover:bg-blue-600 p-1.5 rounded-full opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75" // Button becomes interactive on group-hover
                         aria-label="Add to list"
-                        style={{ pointerEvents: 'auto' }} // Ensure button is clickable
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"> {/* Smaller icon */}
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
                     </button>
